@@ -1,0 +1,88 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="About Us - Engineering Hub">
+  <main>
+    <h1>About <span class="text-gradient">Engineering Hub</span></h1>
+    
+    <div class="content">
+      <section class="about-section">
+        <h2>Our Mission</h2>
+        <p>Engineering Hub is dedicated to providing comprehensive educational resources and tools for engineering students. We aim to simplify the academic journey by offering organized study materials, calculators, and essential information in one place.</p>
+      </section>
+
+      <section class="about-section">
+        <h2>What We Offer</h2>
+        <ul>
+          <li>✓ Complete syllabus coverage for all semesters</li>
+          <li>✓ Well-organized study materials and notes</li>
+          <li>✓ SGPA and CGPA calculators</li>
+          <li>✓ Latest scheme updates and resources</li>
+          <li>✓ Branch-specific content</li>
+        </ul>
+      </section>
+
+      <section class="about-section">
+        <h2>Our Vision</h2>
+        <p>We envision becoming the go-to platform for engineering students, providing quality educational resources and tools that enhance their learning experience and academic performance.</p>
+      </section>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    margin: auto;
+    padding: 2rem;
+    max-width: 800px;
+    color: white;
+  }
+  h1 {
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .text-gradient {
+    background-image: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 400%;
+    background-position: 0%;
+  }
+  .content {
+    background: rgba(var(--accent-dark), 0.2);
+    padding: 2rem;
+    border-radius: 8px;
+  }
+  .about-section {
+    margin-bottom: 2rem;
+  }
+  .about-section:last-child {
+    margin-bottom: 0;
+  }
+  h2 {
+    color: rgb(var(--accent-light));
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  p {
+    line-height: 1.6;
+    opacity: 0.9;
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+  li {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+  }
+  li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: rgb(var(--accent-light));
+  }
+</style>

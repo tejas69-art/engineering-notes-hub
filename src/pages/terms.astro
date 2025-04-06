@@ -1,0 +1,98 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Terms & Conditions - Engineering Hub">
+  <main>
+    <h1>Terms & <span class="text-gradient">Conditions</span></h1>
+    
+    <div class="content">
+      <section>
+        <h2>Acceptance of Terms</h2>
+        <p>By accessing and using Engineering Hub, you accept and agree to be bound by the terms and provision of this agreement.</p>
+      </section>
+
+      <section>
+        <h2>User Conduct</h2>
+        <p>You agree to use our website for lawful purposes and in a way that does not infringe the rights of, restrict, or inhibit anyone else's use and enjoyment of the website.</p>
+      </section>
+
+      <section>
+        <h2>Intellectual Property</h2>
+        <p>The content on Engineering Hub, including text, graphics, logos, and images, is protected by copyright and other intellectual property rights. You may not copy, reproduce, or redistribute any content without explicit permission.</p>
+      </section>
+
+      <section>
+        <h2>User Contributions</h2>
+        <p>When you upload materials to our platform:</p>
+        <ul>
+          <li>You retain ownership of your content</li>
+          <li>You grant us permission to use and distribute it</li>
+          <li>You verify that you have the right to share the content</li>
+          <li>You agree not to upload copyrighted material without permission</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Modifications</h2>
+        <p>We reserve the right to modify these terms at any time. Continued use of the website after any changes constitutes acceptance of the new terms.</p>
+      </section>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    margin: auto;
+    padding: 2rem;
+    max-width: 800px;
+    color: white;
+  }
+  h1 {
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .text-gradient {
+    background-image: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 400%;
+    background-position: 0%;
+  }
+  .content {
+    background: rgba(var(--accent-dark), 0.2);
+    padding: 2rem;
+    border-radius: 8px;
+  }
+  section {
+    margin-bottom: 2rem;
+  }
+  section:last-child {
+    margin-bottom: 0;
+  }
+  h2 {
+    color: rgb(var(--accent-light));
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  p {
+    line-height: 1.6;
+    opacity: 0.9;
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+  li {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+  }
+  li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: rgb(var(--accent-light));
+  }
+</style>

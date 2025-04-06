@@ -1,0 +1,224 @@
+---
+import Layout from '../../../../../../layouts/Layout.astro';
+import { supabase } from '../../../../../../lib/supabase';
+
+export async function getStaticPaths() {
+  const { data: units } = await supabase
+    .from('units')
+    .select(`
+      unit_number,
+      modules (
+        code,
+        schemes (year),
+        branches (code)
+      )
+    `);
+  
+  return (units || []).map(unit => ({
+    params: { 
+      year: unit.modules.schemes.year,
+      branch: unit.modules.branches.code,
+      moduleCode: unit.modules.code,
+      unitNumber: unit.unit_number.toString()
+    }
+  }));
+}
+
+const { year, branch, moduleCode, unitNumber } = Astro.params;
+
+const { data: module } = await supabase
+  .from('modules')
+  .select(`
+    *,
+    schemes (year),
+    branches (code, name)
+  `)
+  .eq('code', moduleCode)
+  .single();
+
+const { data: unit } = await supabase
+  .from('units')
+  .select('*')
+  .eq('module_id', module?.id)
+  .eq('unit_number', parseInt(unitNumber))
+  .single();
+---
+
+<Layout title={`${unit?.title} - ${moduleCode}`}>
+  <main>
+    <div class="unit-header">
+      <h1><span class="text-gradient">{unit?.title}</span></h1>
+      <p class="description">{unit?.description}</p>
+    </div>
+
+    <div class="content-section">
+      <div class="topics-section">
+        <h2>Topics Covered</h2>
+        <ul>
+          {unit?.topics?.map(topic => (
+            <li>{topic}</li>
+          ))}
+        </ul>
+      </div>
+
+      <div class="preview-section">
+        <h2>Unit Materials</h2>
+        {unit?.drive_file_id ? (
+          <>
+            <div class="preview-container">
+              <iframe
+                src={`https://drive.google.com/file/d/${unit.drive_file_id}/preview`}
+                allow="autoplay"
+                class="drive-preview"
+              ></iframe>
+            </div>
+            <div class="download-options">
+              <a 
+                href={`https://drive.google.com/uc?export=download&id=${unit.drive_file_id}`}
+                class="download-button"
+                target="_blank"
+              >
+                Download Materials
+              </a>
+              <a 
+                href={`https://drive.google.com/file/d/${unit.drive_file_id}/view`}
+                class="view-button"
+                target="_blank"
+              >
+                Open in Google Drive
+              </a>
+            </div>
+          </>
+        ) : (
+          <p class="no-materials">Materials will be available soon.</p>
+        )}
+      </div>
+    </div>
+    
+    <a href={`/scheme/${year}/${branch}/${moduleCode}`} class="back-link">← Back to Module</a>
+  </main>
+</Layout>
+
+<style>
+  main {
+    margin: auto;
+    padding: 2rem;
+    width: 100%;
+    max-width: 1200px;
+    color: white;
+    font-size: 20px;
+    line-height: 1.6;
+  }
+  .unit-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+  .text-gradient {
+    background-image: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 400%;
+    background-position: 0%;
+  }
+  .description {
+    max-width: 800px;
+    margin: 0 auto;
+    opacity: 0.8;
+  }
+  .content-section {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 2rem;
+    margin-bottom: 3rem;
+  }
+  .topics-section {
+    background: linear-gradient(rgba(var(--accent-dark), 66%), rgba(var(--accent-dark), 33%));
+    padding: 1.5rem;
+    border-radius: 8px;
+    height: fit-content;
+  }
+  .topics-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .topics-section li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .topics-section li:last-child {
+    border-bottom: none;
+  }
+  .preview-section {
+    background: linear-gradient(rgba(var(--accent-dark), 66%), rgba(var(--accent-dark), 33%));
+    padding: 1.5rem;
+    border-radius: 8px;
+  }
+  .preview-container {
+    background: #fff;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 1rem 0;
+  }
+  .drive-preview {
+    width: 100%;
+    height: 600px;
+    border: none;
+  }
+  .download-options {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+  }
+  .download-button, .view-button {
+    display: inline-block;
+    padding: 0.8rem 1.5rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: opacity 0.2s ease;
+  }
+  .download-button {
+    background: rgb(var(--accent-light));
+    color: rgb(var(--accent-dark));
+  }
+  .view-button {
+    background: rgba(var(--accent-light), 0.1);
+    color: rgb(var(--accent-light));
+  }
+  .download-button:hover, .view-button:hover {
+    opacity: 0.9;
+  }
+  .no-materials {
+    text-align: center;
+    opacity: 0.8;
+    margin: 2rem 0;
+  }
+  h2 {
+    color: rgb(var(--accent-light));
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .back-link {
+    display: block;
+    color: rgb(var(--accent-light));
+    text-decoration: none;
+    margin: 2rem auto 0;
+    text-align: center;
+    width: fit-content;
+  }
+  .back-link:hover {
+    text-decoration: underline;
+  }
+  @media (max-width: 768px) {
+    .content-section {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,195 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { supabase } from '../../../lib/supabase';
+
+export async function getStaticPaths() {
+  const { data: schemes } = await supabase
+    .from('schemes')
+    .select('year');
+  
+  const { data: branches } = await supabase
+    .from('branches')
+    .select('code');
+  
+  return (schemes || []).flatMap(scheme => 
+    (branches || []).map(branch => ({
+      params: { year: scheme.year, branch: branch.code }
+    }))
+  );
+}
+
+const { year, branch } = Astro.params;
+
+const { data: modules } = await supabase
+  .from('modules')
+  .select(`
+    *,
+    schemes (year),
+    branches (code, name)
+  `)
+  .eq('schemes.year', year)
+  .eq('branches.code', branch)
+  .order('semester');
+
+// Group modules by semester
+const semesters = modules?.reduce((acc, module) => {
+  const sem = module.semester;
+  if (!acc[sem]) {
+    acc[sem] = [];
+  }
+  acc[sem].push(module);
+  return acc;
+}, {});
+
+const branchData = await supabase
+  .from('branches')
+  .select('name')
+  .eq('code', branch)
+  .single();
+
+const branchName = branchData?.data?.name || branch;
+---
+
+<Layout title={`${branchName} - ${year} Scheme`}>
+  <main>
+    <h1><span class="text-gradient">{branchName}</span></h1>
+    <p class="scheme-info">{year} Scheme</p>
+
+    {Object.entries(semesters || {}).map(([sem, modules]) => (
+      <div class="semester-section">
+        <h2>Semester {sem}</h2>
+        <div class="modules-grid">
+          {modules.map((module) => (
+            <div class="module-card">
+              <div class="module-header">
+                <h3>{module.name}</h3>
+                <span class="module-code">{module.code}</span>
+              </div>
+              <p class="module-description">{module.description}</p>
+              <div class="module-details">
+                <span class="credits">Credits: {module.credits}</span>
+                <a href={`/scheme/${year}/${branch}/${module.code}`} class="view-syllabus">
+                  View Syllabus →
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    ))}
+    
+    <a href={`/scheme/${year}`} class="back-link">← Back to Branches</a>
+  </main>
+</Layout>
+
+<style>
+  main {
+    margin: auto;
+    padding: 2rem;
+    width: 100%;
+    max-width: 1200px;
+    color: white;
+    font-size: 20px;
+    line-height: 1.6;
+  }
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 0.5rem;
+  }
+  .scheme-info {
+    text-align: center;
+    color: rgb(var(--accent-light));
+    margin-bottom: 2rem;
+  }
+  .text-gradient {
+    background-image: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 400%;
+    background-position: 0%;
+  }
+  .semester-section {
+    margin-bottom: 3rem;
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .semester-section h2 {
+    color: rgb(var(--accent-light));
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+  .modules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+  .module-card {
+    background: linear-gradient(rgba(var(--accent-dark), 66%), rgba(var(--accent-dark), 33%));
+    padding: 1.5rem;
+    border-radius: 8px;
+    transition: transform 0.2s ease;
+  }
+  .module-card:hover {
+    transform: translateY(-3px);
+  }
+  .module-header {
+    margin-bottom: 1rem;
+  }
+  .module-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: white;
+  }
+  .module-code {
+    display: inline-block;
+    background: rgba(var(--accent-light), 0.1);
+    color: rgb(var(--accent-light));
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+  }
+  .module-description {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    margin: 0.5rem 0;
+    line-height: 1.4;
+  }
+  .module-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .credits {
+    font-size: 0.9rem;
+    opacity: 0.8;
+  }
+  .view-syllabus {
+    color: rgb(var(--accent-light));
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: opacity 0.2s ease;
+  }
+  .view-syllabus:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+  }
+  .back-link {
+    display: block;
+    color: rgb(var(--accent-light));
+    text-decoration: none;
+    margin: 2rem auto 0;
+    text-align: center;
+    width: fit-content;
+  }
+  .back-link:hover {
+    text-decoration: underline;
+  }
+</style>

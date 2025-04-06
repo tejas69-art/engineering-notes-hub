@@ -1,0 +1,99 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Privacy Policy - Engineering Hub">
+  <main>
+    <h1>Privacy <span class="text-gradient">Policy</span></h1>
+    
+    <div class="content">
+      <section>
+        <h2>Information We Collect</h2>
+        <p>We collect information that you provide directly to us when you:</p>
+        <ul>
+          <li>Create an account</li>
+          <li>Upload study materials</li>
+          <li>Contact us</li>
+          <li>Use our calculators and tools</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>How We Use Your Information</h2>
+        <p>We use the information we collect to:</p>
+        <ul>
+          <li>Provide and maintain our services</li>
+          <li>Improve user experience</li>
+          <li>Send important updates and notifications</li>
+          <li>Respond to your requests and inquiries</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Data Security</h2>
+        <p>We implement appropriate security measures to protect your personal information. However, no method of transmission over the Internet is 100% secure, and we cannot guarantee absolute security.</p>
+      </section>
+
+      <section>
+        <h2>Cookies</h2>
+        <p>We use cookies to enhance your experience on our website. You can set your browser to refuse all or some browser cookies, but this may affect some functionality.</p>
+      </section>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    margin: auto;
+    padding: 2rem;
+    max-width: 800px;
+    color: white;
+  }
+  h1 {
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .text-gradient {
+    background-image: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 400%;
+    background-position: 0%;
+  }
+  .content {
+    background: rgba(var(--accent-dark), 0.2);
+    padding: 2rem;
+    border-radius: 8px;
+  }
+  section {
+    margin-bottom: 2rem;
+  }
+  section:last-child {
+    margin-bottom: 0;
+  }
+  h2 {
+    color: rgb(var(--accent-light));
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  p {
+    line-height: 1.6;
+    opacity: 0.9;
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+  li {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+  }
+  li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: rgb(var(--accent-light));
+  }
+</style>

@@ -1,0 +1,272 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { supabase } from '../../lib/supabase';
+
+const { data: schemes } = await supabase
+  .from('schemes')
+  .select('*')
+  .order('year', { ascending: false });
+
+const { data: branches } = await supabase
+  .from('branches')
+  .select('*')
+  .order('code');
+---
+
+<Layout title="Upload Notes - VTU">
+  <main>
+    <h1>Upload <span class="text-gradient">Study Materials</span></h1>
+    
+    <div class="upload-container">
+      <form id="upload-form" class="upload-form">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="scheme">Scheme:</label>
+            <select id="scheme" required>
+              <option value="">Select Scheme</option>
+              {schemes?.map(scheme => (
+                <option value={scheme.id}>{scheme.year}</option>
+              ))}
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="branch">Branch:</label>
+            <select id="branch" required>
+              <option value="">Select Branch</option>
+              {branches?.map(branch => (
+                <option value={branch.id}>{branch.name} ({branch.code})</option>
+              ))}
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="semester">Semester:</label>
+            <select id="semester" required>
+              <option value="">Select Semester</option>
+              {[1,2,3,4,5,6,7,8].map(sem => (
+                <option value={sem}>Semester {sem}</option>
+              ))}
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="module">Module:</label>
+            <select id="module" required disabled>
+              <option value="">Select Module</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="title">Title:</label>
+          <input 
+            type="text" 
+            id="title" 
+            required 
+            placeholder="e.g., Unit 1 Notes, Question Bank, etc."
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="description">Description:</label>
+          <textarea 
+            id="description" 
+            rows="3" 
+            placeholder="Brief description of the material"
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="file">File (PDF only):</label>
+          <input 
+            type="file" 
+            id="file" 
+            accept=".pdf" 
+            required
+          />
+        </div>
+
+        <button type="submit" class="submit-btn">Upload Material</button>
+      </form>
+
+      <div id="upload-status" class="upload-status hidden">
+        <div class="status-content">
+          <h3>Upload Status</h3>
+          <p id="status-message"></p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const form = document.getElementById('upload-form');
+    const schemeSelect = document.getElementById('scheme');
+    const branchSelect = document.getElementById('branch');
+    const semesterSelect = document.getElementById('semester');
+    const moduleSelect = document.getElementById('module');
+    const statusDiv = document.getElementById('upload-status');
+    const statusMessage = document.getElementById('status-message');
+
+    async function loadModules() {
+      const scheme = schemeSelect.value;
+      const branch = branchSelect.value;
+      const semester = semesterSelect.value;
+
+      if (scheme && branch && semester) {
+        try {
+          const { data: modules } = await window.supabase
+            .from('modules')
+            .select('*')
+            .eq('scheme_id', scheme)
+            .eq('branch_id', branch)
+            .eq('semester', semester);
+
+          moduleSelect.innerHTML = '<option value="">Select Module</option>';
+          modules?.forEach(module => {
+            const option = document.createElement('option');
+            option.value = module.id;
+            option.textContent = `${module.code} - ${module.name}`;
+            moduleSelect.appendChild(option);
+          });
+          moduleSelect.disabled = false;
+        } catch (error) {
+          console.error('Error loading modules:', error);
+        }
+      }
+    }
+
+    [schemeSelect, branchSelect, semesterSelect].forEach(select => {
+      select.addEventListener('change', loadModules);
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const file = document.getElementById('file').files[0];
+      if (!file) return;
+
+      statusDiv.classList.remove('hidden');
+      statusMessage.textContent = 'Uploading file...';
+
+      try {
+        // Upload file to Supabase Storage
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const filePath = `notes/${fileName}`;
+
+        const { error: uploadError, data } = await window.supabase.storage
+          .from('materials')
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        // Create database entry
+        const { error: dbError } = await window.supabase
+          .from('materials')
+          .insert([{
+            module_id: moduleSelect.value,
+            title: document.getElementById('title').value,
+            description: document.getElementById('description').value,
+            file_path: filePath
+          }]);
+
+        if (dbError) throw dbError;
+
+        statusMessage.textContent = 'Upload successful! Your material will be reviewed before being published.';
+        form.reset();
+        moduleSelect.disabled = true;
+      } catch (error) {
+        console.error('Error:', error);
+        statusMessage.textContent = 'Error uploading file. Please try again.';
+      }
+    });
+  </script>
+
+  <style>
+    main {
+      margin: auto;
+      padding: 2rem;
+      max-width: 800px;
+      color: white;
+    }
+    h1 {
+      font-size: 2.5rem;
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .text-gradient {
+      background-image: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-size: 400%;
+      background-position: 0%;
+    }
+    .upload-container {
+      background: rgba(var(--accent-dark), 0.2);
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: rgb(var(--accent-light));
+    }
+    .form-group select,
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 1px solid rgba(var(--accent-light), 0.2);
+    }
+    .form-group textarea {
+      resize: vertical;
+    }
+    .submit-btn {
+      width: 100%;
+      padding: 1rem;
+      background: rgb(var(--accent-light));
+      color: rgb(var(--accent-dark));
+      border: none;
+      border-radius: 4px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+    .submit-btn:hover {
+      opacity: 0.9;
+    }
+    .upload-status {
+      margin-top: 2rem;
+      padding: 1rem;
+      border-radius: 4px;
+      background: rgba(var(--accent-light), 0.1);
+    }
+    .status-content {
+      text-align: center;
+    }
+    .status-content h3 {
+      color: rgb(var(--accent-light));
+      margin: 0 0 0.5rem;
+    }
+    .status-content p {
+      margin: 0;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
+</Layout>

@@ -1,0 +1,123 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SchemeCard from '../components/SchemeCard.astro';
+import { supabase } from '../lib/supabase';
+
+const { data: schemes } = await supabase
+  .from('schemes')
+  .select('*')
+  .order('year', { ascending: false });
+---
+
+<Layout title="Engineering Notes Hub">
+  <main>
+    <h1>Engineering <span class="text-gradient">Notes Hub</span></h1>
+    
+    <section class="schemes-section">
+      <h2>Select Your Scheme</h2>
+      <div class="schemes-grid">
+        {schemes?.map((scheme) => (
+          <SchemeCard 
+            year={scheme.year}
+            description={scheme.description}
+            href={`/scheme/${scheme.year}`}
+          />
+        ))}
+      </div>
+    </section>
+
+    <section class="about-section">
+      <h2>About Engineering Notes Hub</h2>
+      <div class="about-content">
+        <p>Welcome to your comprehensive resource for engineering notes from semester 1 to 8. We provide:</p>
+        <ul>
+          <li>✓ Complete syllabus coverage</li>
+          <li>✓ Organized semester-wise content</li>
+          <li>✓ Multiple engineering branches</li>
+          <li>✓ Updated with latest schemes</li>
+          <li>✓ Easy navigation and access</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+</Layout>
+
+<style>
+  main {
+    margin: auto;
+    padding: 2rem;
+    width: 100%;
+    max-width: 1200px;
+    color: white;
+    font-size: 20px;
+    line-height: 1.6;
+  }
+  h1 {
+    font-size: 3.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+  .text-gradient {
+    background-image: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 400%;
+    background-position: 0%;
+  }
+  .schemes-section {
+    margin-bottom: 5rem;
+  }
+  .schemes-section h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .schemes-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    padding: 0;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  @media (max-width: 768px) {
+    .schemes-grid {
+      grid-template-columns: 1fr;
+      max-width: 400px;
+    }
+  }
+  .about-section {
+    background: linear-gradient(rgba(var(--accent-dark), 66%), rgba(var(--accent-dark), 33%));
+    padding: 3rem;
+    border-radius: 12px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .about-section h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .about-content ul {
+    list-style: none;
+    padding: 0;
+    max-width: 500px;
+    margin: 1.5rem auto 0;
+  }
+  .about-content li {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+  }
+  .about-content li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: rgb(var(--accent-light));
+  }
+  h2 {
+    color: rgb(var(--accent-light));
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+  }
+</style>

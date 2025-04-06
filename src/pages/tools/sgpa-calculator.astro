@@ -1,0 +1,237 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const semesters = [1, 2, 3, 4, 5, 6, 7, 8];
+---
+
+<Layout title="SGPA Calculator - VTU">
+  <main>
+    <h1>VTU <span class="text-gradient">SGPA Calculator</span></h1>
+    
+    <div class="calculator-container">
+      <div class="semester-selector">
+        <label for="semester">Select Semester:</label>
+        <select id="semester" class="semester-select">
+          {semesters.map(sem => (
+            <option value={sem}>Semester {sem}</option>
+          ))}
+        </select>
+      </div>
+
+      <div id="subjects-container" class="subjects-container">
+        <!-- Subjects will be added here dynamically -->
+      </div>
+
+      <button id="calculate-btn" class="calculate-btn">Calculate SGPA</button>
+
+      <div id="result" class="result hidden">
+        <h2>Your SGPA: <span id="sgpa-value">0.00</span></h2>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const subjectsData = {
+      1: [
+        { name: 'Engineering Mathematics - 1', credits: 4 },
+        { name: 'Engineering Physics', credits: 4 },
+        { name: 'Engineering Chemistry', credits: 4 },
+        { name: 'Basic Electronics', credits: 3 },
+        { name: 'Basic Programming', credits: 3 },
+        { name: 'Engineering Graphics', credits: 3 },
+      ],
+      2: [
+        { name: 'Engineering Mathematics - 2', credits: 4 },
+        { name: 'Basic Electrical Engineering', credits: 4 },
+        { name: 'Elements of Civil Engineering', credits: 3 },
+        { name: 'Elements of Mechanical Engineering', credits: 3 },
+        { name: 'Engineering Visualization', credits: 3 },
+        { name: 'Technical English', credits: 2 },
+      ],
+      3: [
+        { name: 'Engineering Mathematics - 3', credits: 4 },
+        { name: 'Data Structures', credits: 4 },
+        { name: 'Analog and Digital Electronics', credits: 4 },
+        { name: 'Computer Organization', credits: 3 },
+        { name: 'Software Engineering', credits: 3 },
+        { name: 'Discrete Mathematics', credits: 3 },
+      ],
+      4: [
+        { name: 'Engineering Mathematics - 4', credits: 4 },
+        { name: 'Design and Analysis of Algorithms', credits: 4 },
+        { name: 'Operating Systems', credits: 4 },
+        { name: 'Microcontrollers', credits: 3 },
+        { name: 'Object Oriented Programming', credits: 3 },
+        { name: 'Database Management Systems', credits: 3 },
+      ],
+      5: [
+        { name: 'Computer Networks', credits: 4 },
+        { name: 'Automata Theory and Computability', credits: 4 },
+        { name: 'Web Technologies', credits: 3 },
+        { name: 'Professional Elective - 1', credits: 3 },
+        { name: 'Open Elective - 1', credits: 3 },
+        { name: 'Application Development Lab', credits: 2 },
+      ],
+      6: [
+        { name: 'System Software and Compiler Design', credits: 4 },
+        { name: 'Computer Graphics and Visualization', credits: 4 },
+        { name: 'Machine Learning', credits: 3 },
+        { name: 'Professional Elective - 2', credits: 3 },
+        { name: 'Open Elective - 2', credits: 3 },
+        { name: 'System Software Lab', credits: 2 },
+      ],
+      7: [
+        { name: 'Artificial Intelligence', credits: 4 },
+        { name: 'Big Data Analytics', credits: 4 },
+        { name: 'Professional Elective - 3', credits: 3 },
+        { name: 'Professional Elective - 4', credits: 3 },
+        { name: 'Project Phase - 1', credits: 2 },
+        { name: 'Technical Seminar', credits: 1 },
+      ],
+      8: [
+        { name: 'Professional Elective - 5', credits: 3 },
+        { name: 'Professional Elective - 6', credits: 3 },
+        { name: 'Project Phase - 2', credits: 8 },
+        { name: 'Technical Paper Writing', credits: 1 },
+      ],
+    };
+
+    function createSubjectInputs(semester) {
+      const container = document.getElementById('subjects-container');
+      container.innerHTML = '';
+
+      const subjects = subjectsData[semester] || [];
+      subjects.forEach((subject, index) => {
+        const div = document.createElement('div');
+        div.className = 'subject-input';
+        div.innerHTML = `
+          <label>${subject.name} (${subject.credits} credits)</label>
+          <select class="grade-select" data-credits="${subject.credits}">
+            <option value="">Select Grade</option>
+            <option value="10">S</option>
+            <option value="9">A</option>
+            <option value="8">B</option>
+            <option value="7">C</option>
+            <option value="6">D</option>
+            <option value="5">E</option>
+            <option value="0">F</option>
+          </select>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function calculateSGPA() {
+      const gradeSelects = document.querySelectorAll('.grade-select');
+      let totalCredits = 0;
+      let totalPoints = 0;
+
+      gradeSelects.forEach(select => {
+        const grade = parseFloat(select.value);
+        const credits = parseFloat(select.dataset.credits);
+        
+        if (!isNaN(grade) && !isNaN(credits)) {
+          totalPoints += grade * credits;
+          totalCredits += credits;
+        }
+      });
+
+      const sgpa = totalCredits > 0 ? (totalPoints / totalCredits).toFixed(2) : '0.00';
+      
+      document.getElementById('sgpa-value').textContent = sgpa;
+      document.getElementById('result').classList.remove('hidden');
+    }
+
+    // Event Listeners
+    document.getElementById('semester').addEventListener('change', (e) => {
+      createSubjectInputs(parseInt(e.target.value));
+      document.getElementById('result').classList.add('hidden');
+    });
+
+    document.getElementById('calculate-btn').addEventListener('click', calculateSGPA);
+
+    // Initialize first semester
+    createSubjectInputs(1);
+  </script>
+
+  <style>
+    main {
+      margin: auto;
+      padding: 2rem;
+      max-width: 800px;
+      color: white;
+    }
+    h1 {
+      font-size: 2.5rem;
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .text-gradient {
+      background-image: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-size: 400%;
+      background-position: 0%;
+    }
+    .calculator-container {
+      background: rgba(var(--accent-dark), 0.2);
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .semester-selector {
+      margin-bottom: 2rem;
+    }
+    .semester-select {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 1px solid rgba(var(--accent-light), 0.2);
+    }
+    .subject-input {
+      margin-bottom: 1rem;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 1rem;
+      align-items: center;
+    }
+    .grade-select {
+      padding: 0.5rem;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 1px solid rgba(var(--accent-light), 0.2);
+      min-width: 120px;
+    }
+    .calculate-btn {
+      width: 100%;
+      padding: 1rem;
+      background: rgb(var(--accent-light));
+      color: rgb(var(--accent-dark));
+      border: none;
+      border-radius: 4px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+    .calculate-btn:hover {
+      opacity: 0.9;
+    }
+    .result {
+      margin-top: 2rem;
+      text-align: center;
+      padding: 1rem;
+      background: rgba(var(--accent-light), 0.1);
+      border-radius: 4px;
+    }
+    .result h2 {
+      margin: 0;
+      color: rgb(var(--accent-light));
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
+</Layout>

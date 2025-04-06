@@ -1,0 +1,165 @@
+---
+import Layout from '../../../../layouts/Layout.astro';
+import { supabase } from '../../../../lib/supabase';
+
+export async function getStaticPaths() {
+  const { data: modules } = await supabase
+    .from('modules')
+    .select(`
+      code,
+      schemes (year),
+      branches (code)
+    `);
+  
+  return (modules || []).map(module => ({
+    params: { 
+      year: module.schemes.year,
+      branch: module.branches.code,
+      moduleCode: module.code
+    }
+  }));
+}
+
+const { year, branch, moduleCode } = Astro.params;
+
+const { data: module } = await supabase
+  .from('modules')
+  .select(`
+    *,
+    schemes (year),
+    branches (code, name)
+  `)
+  .eq('code', moduleCode)
+  .single();
+
+const { data: units } = await supabase
+  .from('units')
+  .select('*')
+  .eq('module_id', module?.id)
+  .order('unit_number');
+---
+
+<Layout title={`${module?.name} Syllabus - ${year} Scheme`}>
+  <main>
+    <div class="module-header">
+      <h1><span class="text-gradient">{module?.name}</span></h1>
+      <p class="module-code">{moduleCode}</p>
+      <p class="description">{module?.description}</p>
+    </div>
+
+    <div class="units-section">
+      <h2>Course Units</h2>
+      <div class="units-grid">
+        {units?.map((unit) => (
+          <div class="unit-card">
+            <h3>{unit.title}</h3>
+            <p>{unit.description}</p>
+            <a 
+              href={`/scheme/${year}/${branch}/${moduleCode}/unit/${unit.unit_number}`}
+              class="unit-materials-link"
+            >
+              View Unit Materials →
+            </a>
+          </div>
+        ))}
+      </div>
+    </div>
+    
+    <a href={`/scheme/${year}/${branch}`} class="back-link">← Back to Modules</a>
+  </main>
+</Layout>
+
+<style>
+  main {
+    margin: auto;
+    padding: 2rem;
+    width: 100%;
+    max-width: 1200px;
+    color: white;
+    font-size: 20px;
+    line-height: 1.6;
+  }
+  .module-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+  .text-gradient {
+    background-image: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 400%;
+    background-position: 0%;
+  }
+  .module-code {
+    color: rgb(var(--accent-light));
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+  .description {
+    max-width: 800px;
+    margin: 0 auto;
+    opacity: 0.8;
+  }
+  .units-section {
+    margin-bottom: 3rem;
+  }
+  .units-section h2 {
+    text-align: center;
+    color: rgb(var(--accent-light));
+    font-size: 2rem;
+    margin-bottom: 2rem;
+  }
+  .units-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  .unit-card {
+    background: linear-gradient(rgba(var(--accent-dark), 66%), rgba(var(--accent-dark), 33%));
+    padding: 1.5rem;
+    border-radius: 8px;
+    transition: transform 0.2s ease;
+  }
+  .unit-card:hover {
+    transform: translateY(-3px);
+  }
+  .unit-card h3 {
+    color: rgb(var(--accent-light));
+    font-size: 1.2rem;
+    margin: 0 0 1rem 0;
+  }
+  .unit-card p {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    margin: 0;
+    line-height: 1.4;
+  }
+  .unit-materials-link {
+    display: inline-block;
+    color: rgb(var(--accent-light));
+    text-decoration: none;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+  }
+  .unit-materials-link:hover {
+    text-decoration: underline;
+  }
+  .back-link {
+    display: block;
+    color: rgb(var(--accent-light));
+    text-decoration: none;
+    margin: 2rem auto 0;
+    text-align: center;
+    width: fit-content;
+  }
+  .back-link:hover {
+    text-decoration: underline;
+  }
+</style>

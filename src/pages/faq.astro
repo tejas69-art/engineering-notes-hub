@@ -1,0 +1,76 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="FAQ - Engineering Hub">
+  <main>
+    <h1>Frequently Asked <span class="text-gradient">Questions</span></h1>
+    
+    <div class="faq-container">
+      <div class="faq-item">
+        <h2>How do I calculate my SGPA?</h2>
+        <p>Use our SGPA Calculator tool. Select your semester, enter your grades for each subject, and the calculator will compute your SGPA automatically considering the credit weightage of each subject.</p>
+      </div>
+
+      <div class="faq-item">
+        <h2>How do I calculate my CGPA?</h2>
+        <p>Use our CGPA Calculator tool. Enter your SGPA for each completed semester, and the calculator will compute your cumulative GPA.</p>
+      </div>
+
+      <div class="faq-item">
+        <h2>How can I access study materials?</h2>
+        <p>Navigate to your scheme year, select your branch, and then choose the desired semester and subject. You'll find organized study materials for each unit.</p>
+      </div>
+
+      <div class="faq-item">
+        <h2>Can I contribute study materials?</h2>
+        <p>Yes! Use our Upload Notes feature to contribute. Materials are reviewed before being published to ensure quality.</p>
+      </div>
+
+      <div class="faq-item">
+        <h2>How often is the content updated?</h2>
+        <p>We regularly update our content to align with the latest VTU syllabus and schemes. New materials are added frequently.</p>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    margin: auto;
+    padding: 2rem;
+    max-width: 800px;
+    color: white;
+  }
+  h1 {
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .text-gradient {
+    background-image: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 400%;
+    background-position: 0%;
+  }
+  .faq-container {
+    display: grid;
+    gap: 1.5rem;
+  }
+  .faq-item {
+    background: rgba(var(--accent-dark), 0.2);
+    padding: 1.5rem;
+    border-radius: 8px;
+  }
+  h2 {
+    color: rgb(var(--accent-light));
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+  }
+  p {
+    line-height: 1.6;
+    opacity: 0.9;
+    margin: 0;
+  }
+</style>

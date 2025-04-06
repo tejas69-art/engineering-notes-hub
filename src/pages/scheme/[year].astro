@@ -1,0 +1,106 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { supabase } from '../../lib/supabase';
+
+export async function getStaticPaths() {
+  const { data: schemes } = await supabase
+    .from('schemes')
+    .select('year');
+  
+  return schemes?.map(scheme => ({
+    params: { year: scheme.year }
+  })) || [];
+}
+
+const { year } = Astro.params;
+
+const { data: branches } = await supabase
+  .from('branches')
+  .select('*')
+  .order('code');
+---
+
+<Layout title={`${year} Scheme - Branches`}>
+  <main>
+    <h1><span class="text-gradient">{year}</span> Scheme</h1>
+    <div class="branches-grid">
+      {branches?.map((branch) => (
+        <a href={`/scheme/${year}/${branch.code}`} class="branch-card">
+          <h2>{branch.name}</h2>
+          <p class="branch-code">{branch.code}</p>
+          <p class="description">{branch.description}</p>
+        </a>
+      ))}
+    </div>
+    <a href="/" class="back-link">← Back to Schemes</a>
+  </main>
+</Layout>
+
+<style>
+  main {
+    margin: auto;
+    padding: 2rem;
+    width: 100%;
+    max-width: 1200px;
+    color: white;
+    font-size: 20px;
+    line-height: 1.6;
+  }
+  h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .text-gradient {
+    background-image: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 400%;
+    background-position: 0%;
+  }
+  .branches-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin: 0 auto 2rem;
+    max-width: 1000px;
+  }
+  .branch-card {
+    background: linear-gradient(rgba(var(--accent-dark), 66%), rgba(var(--accent-dark), 33%));
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    color: white;
+    transition: transform 0.2s ease;
+  }
+  .branch-card:hover {
+    transform: translateY(-5px);
+  }
+  .branch-card h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: rgb(var(--accent-light));
+  }
+  .branch-code {
+    font-size: 1rem;
+    color: rgb(var(--accent-light));
+    margin: 0.5rem 0;
+  }
+  .description {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.8;
+  }
+  .back-link {
+    display: block;
+    color: rgb(var(--accent-light));
+    text-decoration: none;
+    margin: 2rem auto 0;
+    text-align: center;
+    width: fit-content;
+  }
+  .back-link:hover {
+    text-decoration: underline;
+  }
+</style>
